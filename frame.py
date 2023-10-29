@@ -25,7 +25,7 @@ def convertBack(size):
     return total
 
 def framer(sd, files):                          #takes a socket descriptor and list of filenames to send
-    buffWtr = buffer.BufferedFdWriter(sd)
+    buffWtr = buffers.BufferedFdWriter(sd)
     for target in files:
         #opening file to read with file descriptor
         fd = os.open(target, os.O_RDONLY)
@@ -58,23 +58,54 @@ def framer(sd, files):                          #takes a socket descriptor and l
     buffWtr.flush()
 
 
-def deframer(sd):                                               #takes socket descriptor
+def deframer(sd):                #takes socket descriptor
+    fileMap = {"fileName": 1}
+    reader = buffers.BufferedFdReader(sd)
     while(True):
-        nameSize = convertBack(os.read(sd, 8).decode())
-        if(nameSize == 0):                                      
-            return 0                                            #returns 0 on zero read (end of connection)
-        fileName = os.read(sd, nameSize).decode()
-        #Not going to use buffered reader here because I know file name can only be up to 256 bytes max, and the 8 before I know are there
-
-        #fd for target file
-        fileName = os.open(fileName, os.O_WRONLY)
+        outOfBand = 8
+        bytesRead = 0
+        nameSize = ""
+        while(bytesRead < outOfBand):
+            nameSize += reader.readByte().decode()
+            bytesRead++
             
-
-        fileSize = convertBack(os.read(sd, 8).decode())
+        nameSize = convertBack(nameSize)
+        
+        if(nameSize == 0):                                      
+            return 0                                 #returns 0 on zero read (end of connection)
 
         bytesRead = 0
-        buffRdr = buffer.BufferedFdReader(sd)          #reading from connection
-        buffWtr = buffer.BufferedFdWriter(fileName)    #writing to "new" file
+        fileName = ""
+        while(bytesRead < nameSize):
+            fileName += reader.readByte().decode()
+            bytesRead++
+            
+        
+        #Add clause for duplicate files here
+        if fileName in fileMap:
+            fileName += str(fileMap[fileName])         #Adding extra number to file if duplicate
+            fileMap[fileName]++
+        else:
+            fileMap.add(fileName, 1 )                  #Adding instance of file name to map for future occurences
+
+        #fd for target file
+        folder = "temp/"                        #saving any files received to a different directory
+        folder += fileName
+        fileName = os.open(folder, os.O_WRONLY)    
+
+        fileSize = ""
+        bytesRead = 0
+        while(bytesRead < 8):
+            fileSize += reader.readByte().decode()
+            bytesRead++
+
+        fileSize = convertBack(fileSize)
+
+        
+        bytesRead = 0
+        buffRdr = buffers.BufferedFdReader(sd)          #reading from connection
+        buffWtr = buffers.BufferedFdWriter(fileName)    #writing to "new" file
+        
         while (bytesRead < fileSize ):
             byte = buffRdr.readByte()
             buffWtr.writeByte(byte)

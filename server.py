@@ -1,7 +1,7 @@
 #! /user/bin/env python3
 
 import socket, sys, re, os
-sys.path.append("../lib")
+sys.path.append("lib")
 import params, buffers, frame
 
 switchesVarDefaults = (
