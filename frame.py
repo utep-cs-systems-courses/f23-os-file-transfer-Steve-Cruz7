@@ -30,7 +30,7 @@ def framer(sd, files):                          #takes a socket descriptor and l
         #opening file to read with file descriptor
         fd = os.open(target, os.O_RDONLY)
         #creating instances of buffered reader and writer
-        buffRdr = buffer.BufferedFdReader(fd)
+        buffRdr = buffers.BufferedFdReader(fd)
 
         
         #writing size of filename
@@ -51,7 +51,7 @@ def framer(sd, files):                          #takes a socket descriptor and l
         #create buffered reader to moderate reading, same for writing
         
         #Now that fileNameSize, fileName, and targetFileSize are written into buffer, we can just copy over file contents with Copy
-        bufferedCopy(buffRdr, buffWtr)  
+        buffers.bufferedCopy(buffRdr, buffWtr)  
 
         #Repeat the process for the rest of the files
 
@@ -59,7 +59,7 @@ def framer(sd, files):                          #takes a socket descriptor and l
 
 
 def deframer(sd):                #takes socket descriptor
-    fileMap = {"fileName": 1}
+    fileMap = {}
     reader = buffers.BufferedFdReader(sd)
     while(True):
         outOfBand = 8
@@ -67,7 +67,7 @@ def deframer(sd):                #takes socket descriptor
         nameSize = ""
         while(bytesRead < outOfBand):
             nameSize += reader.readByte().decode()
-            bytesRead++
+            bytesRead+=1
             
         nameSize = convertBack(nameSize)
         
@@ -78,15 +78,15 @@ def deframer(sd):                #takes socket descriptor
         fileName = ""
         while(bytesRead < nameSize):
             fileName += reader.readByte().decode()
-            bytesRead++
+            bytesRead+=1
             
         
         #Add clause for duplicate files here
         if fileName in fileMap:
             fileName += str(fileMap[fileName])         #Adding extra number to file if duplicate
-            fileMap[fileName]++
+            fileMap[fileName]+=1
         else:
-            fileMap.add(fileName, 1 )                  #Adding instance of file name to map for future occurences
+            fileMap[fileName] = 1                   #Adding instance of file name to map for future occurences
 
         #fd for target file
         folder = "temp/"                        #saving any files received to a different directory
@@ -97,7 +97,7 @@ def deframer(sd):                #takes socket descriptor
         bytesRead = 0
         while(bytesRead < 8):
             fileSize += reader.readByte().decode()
-            bytesRead++
+            bytesRead+=1
 
         fileSize = convertBack(fileSize)
 

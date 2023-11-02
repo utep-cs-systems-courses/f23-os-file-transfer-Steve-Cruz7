@@ -1,4 +1,4 @@
-#! /user/bin/env python3
+#! /usr/bin/env python3
 
 import socket, sys, re, os
 sys.path.append("lib")
@@ -26,9 +26,9 @@ s.listen(1)                                            #turning s into a listene
 conn, addr = s.accept()                                #accepting incoming connection and get socket descriptor of that connection
 print('Connected by', addr)
 
-writer = buffers.BufferedFdWrite(s)
+writer = buffers.BufferedFdWrite(conn.fileno())
 while 1:
-    flag = frame.frame("x", conn)
+    flag = frame.frame("x", conn.fileno())
     if flag == 0:
         print("Zero length read, nothing to send, terminating...")
         break
@@ -38,4 +38,4 @@ while 1:
     writer.flush()
 
 conn.shutdown(socket.SHUT_WR)
-conn.close()
+#conn.close()

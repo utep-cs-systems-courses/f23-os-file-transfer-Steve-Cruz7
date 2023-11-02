@@ -2,8 +2,9 @@
 
 #client side
 import socket, sys, re, os
-sys.path.append("../lib")
-import params, frame, buffers
+sys.path.append("lib")
+import params
+import frame, buffers
 
 switchesVarDefaults = (
     (('-s', '--server'), 'server', "127.0.0.1:50001"),
@@ -26,7 +27,7 @@ except:
     sys.exit(1)
 
 s = None
-for res in socket.getaddrinfo(serverHost. serverPort, socket.AF_UNSPEC, socket.SOCK_STREAM):
+for res in socket.getaddrinfo(serverHost, serverPort, socket.AF_UNSPEC, socket.SOCK_STREAM):
     af, socktype, proto, canonname, sa = res
     try:
         print("creating sock: af=%d, type=%d, proto=%d" % (af, socktype, proto))
@@ -38,11 +39,15 @@ for res in socket.getaddrinfo(serverHost. serverPort, socket.AF_UNSPEC, socket.S
         continue
     break
 
+
+#LOOK AT ECHO CLIENT TO SEE HOW TO MAKE A CONNECTION
+
+
 if s is None:
     print('could not open socket')
     sys.exit(1)
 
-frame.frame("c", s)                         #sending file information after framing
+frame.frame("c", s.fileno())                         #sending file information after framing
 
 s.shutdown(socket.SHUT_WR)
 
@@ -58,4 +63,5 @@ print("Zero length read. Closing")
 #For example, when waiting for the first 8 bytes since Im an OutOfBander, I can wait until the buffer has a length of 8 and then read a filename
 #And then repeat this for the second part of the deframer.
 
-s.close()
+
+#s.close()
