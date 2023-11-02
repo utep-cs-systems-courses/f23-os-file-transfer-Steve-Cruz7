@@ -58,15 +58,16 @@ def framer(sd, files):                          #takes a socket descriptor and l
     buffWtr.flush()
 
 
-def deframer(sd):                #takes socket descriptor
+def deframer(sd):                #takes socket file descriptor
     fileMap = {}
     reader = buffers.BufferedFdReader(sd)
     while(True):
         outOfBand = 8
         bytesRead = 0
         nameSize = ""
-        while(bytesRead < outOfBand):
-            nameSize += reader.readByte().decode()
+        while(bytesRead < outOfBand):                #I want to use bufferedReader here, but its messing with my values
+            byte = os.read(sd, 1)
+            nameSize += byte.decode()
             bytesRead+=1
             
         nameSize = convertBack(nameSize)
@@ -77,10 +78,9 @@ def deframer(sd):                #takes socket descriptor
         bytesRead = 0
         fileName = ""
         while(bytesRead < nameSize):
-            fileName += reader.readByte().decode()
+            fileName += os.read(sd, 1).decode()
             bytesRead+=1
             
-        
         #Add clause for duplicate files here
         if fileName in fileMap:
             fileName += str(fileMap[fileName])         #Adding extra number to file if duplicate
@@ -89,17 +89,17 @@ def deframer(sd):                #takes socket descriptor
             fileMap[fileName] = 1                   #Adding instance of file name to map for future occurences
 
         #fd for target file
-        folder = "temp/"                        #saving any files received to a different directory
-        folder += fileName
-        fileName = os.open(folder, os.O_WRONLY)    
-
+        folder = "temp"                        #saving any files received to a different directory
+        os.chdir(folder)
+        fileName = os.open(fileName, os.O_WRONLY) #os.O_WRONLY   
         fileSize = ""
         bytesRead = 0
         while(bytesRead < 8):
-            fileSize += reader.readByte().decode()
+            fileSize += os.read(sd, 1).decode()
             bytesRead+=1
 
         fileSize = convertBack(fileSize)
+        
 
         
         bytesRead = 0

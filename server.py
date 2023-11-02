@@ -26,7 +26,7 @@ s.listen(1)                                            #turning s into a listene
 conn, addr = s.accept()                                #accepting incoming connection and get socket descriptor of that connection
 print('Connected by', addr)
 
-writer = buffers.BufferedFdWrite(conn.fileno())
+writer = buffers.BufferedFdWriter(conn.fileno())
 while 1:
     flag = frame.frame("x", conn.fileno())
     if flag == 0:
@@ -38,4 +38,4 @@ while 1:
     writer.flush()
 
 conn.shutdown(socket.SHUT_WR)
-#conn.close()
+conn.close()

@@ -37,6 +37,14 @@ for res in socket.getaddrinfo(serverHost, serverPort, socket.AF_UNSPEC, socket.S
         s.close()
         s = None
         continue
+    try:
+        print("attempting to connect to %s" % repr(sa))
+        s.connect(sa)
+    except socket.error as msg:
+        print(" error: %s" % msg)
+        s.close()
+        s = None
+        continue
     break
 
 
@@ -64,4 +72,4 @@ print("Zero length read. Closing")
 #And then repeat this for the second part of the deframer.
 
 
-#s.close()
+s.close()
