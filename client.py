@@ -47,8 +47,7 @@ for res in socket.getaddrinfo(serverHost, serverPort, socket.AF_UNSPEC, socket.S
         continue
     break
 
-
-#LOOK AT ECHO CLIENT TO SEE HOW TO MAKE A CONNECTION
+#Adding delays here if necessary
 
 
 if s is None:
